@@ -31,7 +31,12 @@
             ],
             "styles": [
               "src/assets/styles/styles.scss"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/assets/styles/utils"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -89,7 +94,12 @@
             ],
             "styles": [
               "src/assets/styles/styles.scss"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/assets/styles/utils"
+              ]
+            }
           }
         }
       }
