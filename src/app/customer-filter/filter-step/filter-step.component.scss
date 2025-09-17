@@ -1,15 +1,16 @@
 @use 'functions' as *;
 
 .step-actions {
-  visibility: hidden;
+  opacity: 0;
 }
 
 .step-item {
   padding-bottom: to-rem(20);
 
-  &:hover {
+  &:hover,
+  &:focus-within {
     .step-actions {
-      visibility: visible;
+      opacity: 1;
     }
   }
 

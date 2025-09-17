@@ -4,17 +4,18 @@ mat-form-field {
   margin-right: to-rem(15);
 }
 
-.wrapper {
-  display: flex;
-  &:hover {
-    .actions-wrapper {
-      display: block;
-    }
-  }
+.actions-wrapper {
+  opacity: 0;
 }
 
-.actions-wrapper {
-  display: none;
+.wrapper {
+  display: flex;
+  &:hover,
+  &:focus-within {
+    .actions-wrapper {
+      opacity: 1;
+    }
+  }
 }
 
 .attribute-filter {
