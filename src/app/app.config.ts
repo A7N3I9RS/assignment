@@ -1,5 +1,12 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, isDevMode } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZoneChangeDetection,
+  isDevMode
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
 import { provideStore } from '@ngrx/store';
@@ -10,6 +17,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAnimationsAsync(),
+    provideHttpClient(),
     provideRouter(routes),
     provideStore(),
     provideEffects(),

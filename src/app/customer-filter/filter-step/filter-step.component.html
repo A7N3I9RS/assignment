@@ -1,0 +1,83 @@
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-title">
+      <span class="step-index">Step {{ stepIndex + 1 }}</span>
+      <span class="step-event" *ngIf="step.eventType">· {{ step.eventType }}</span>
+    </div>
+    <div class="step-actions">
+      <button mat-icon-button type="button" aria-label="Duplicate step" (click)="onDuplicateStep()">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        type="button"
+        aria-label="Remove step"
+        [disabled]="isOnlyStep"
+        (click)="onRemoveStep()"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="event-selector">
+    <mat-form-field appearance="outline" class="event-field">
+      <mat-label>Select an event</mat-label>
+      <input
+        matInput
+        [formControl]="eventControl"
+        [matAutocomplete]="eventAutocomplete"
+        placeholder="Start typing to search"
+      />
+      <button
+        *ngIf="step.eventType"
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Clear event"
+        (click)="clearEvent()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <mat-autocomplete
+      #eventAutocomplete="matAutocomplete"
+      (optionSelected)="onEventSelected($event.option.value)"
+    >
+      <mat-option
+        *ngFor="let event of filterEvents(eventControl.value)"
+        [value]="event.type"
+      >
+        {{ event.type }}
+      </mat-option>
+    </mat-autocomplete>
+  </div>
+
+  <div class="attributes" *ngIf="step.eventType; else selectEventFirst">
+    <div class="attribute-list" *ngIf="step.attributes.length; else noAttributes">
+      <app-attribute-filter
+        *ngFor="let attribute of step.attributes; trackBy: trackAttribute"
+        [attribute]="attribute"
+        [eventLabel]="step.eventType"
+        [availableAttributes]="selectedEvent?.properties ?? []"
+        (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
+        (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
+        (valueChange)="onAttributeValueChange(attribute.id, $event)"
+        (remove)="onRemoveAttribute(attribute.id)"
+      ></app-attribute-filter>
+    </div>
+    <ng-template #noAttributes>
+      <p class="empty-message">No attribute filters yet.</p>
+    </ng-template>
+
+    <button mat-stroked-button type="button" class="add-attribute" (click)="onAddAttribute()">
+      Add an event attribute
+    </button>
+  </div>
+
+  <ng-template #selectEventFirst>
+    <p class="empty-message">Choose an event to start filtering its attributes.</p>
+  </ng-template>
+</div>
