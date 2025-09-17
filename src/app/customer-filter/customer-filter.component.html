@@ -1,5 +1,5 @@
 <mat-card class="customer-filter" appearance="outlined">
-  <header class="filter-header">
+  <div class="filter-header">
     <div class="header-text">
       <h1>CUSTOMER FILTER</h1>
     </div>
@@ -8,34 +8,42 @@
         Discard filters
       </button>
     </div>
-  </header>
+  </div>
 
-  <section class="steps">
-    <ng-container *ngIf="steps() as stepList">
-      <app-filter-step
-        *ngFor="let step of stepList; index as index; trackBy: trackStep"
-        [step]="step"
-        [stepIndex]="index"
-        [events]="events()"
-        [isOnlyStep]="stepList.length === 1"
-        (eventSelect)="onEventSelect($event)"
-        (addAttribute)="addAttribute($event)"
-        (attributePropertyChange)="onAttributePropertyChange($event)"
-        (attributeOperatorChange)="onAttributeOperatorChange($event)"
-        (attributeValueChange)="onAttributeValueChange($event)"
-        (removeAttribute)="removeAttribute($event)"
-        (duplicate)="duplicateStep($event)"
-        (remove)="removeStep($event)"
-      ></app-filter-step>
-    </ng-container>
-  </section>
+  <div>
+    <mat-card class="steps" appearance="outlined">
+      <div class="content">
+        <ng-container *ngIf="steps() as stepList">
+          <app-filter-step
+            *ngFor="let step of stepList; index as index; trackBy: trackStep"
+            [step]="step"
+            [stepIndex]="index"
+            [events]="events()"
+            [isOnlyStep]="stepList.length === 1"
+            (eventSelect)="onEventSelect($event)"
+            (addAttribute)="addAttribute($event)"
+            (attributePropertyChange)="onAttributePropertyChange($event)"
+            (attributeOperatorChange)="onAttributeOperatorChange($event)"
+            (attributeValueChange)="onAttributeValueChange($event)"
+            (removeAttribute)="removeAttribute($event)"
+            (duplicate)="duplicateStep($event)"
+            (remove)="removeStep($event)"
+          ></app-filter-step>
+        </ng-container>
+      </div>
 
-  <button matButton class="add-step" (click)="addStep()">
-    <mat-icon>add</mat-icon>
-    ADD FUNNEL STEP
-  </button>
+      <div class="footer">
+        <button matButton class="add-step" (click)="addStep()">
+          <mat-icon>add</mat-icon>
+          ADD FUNNEL STEP
+        </button>
+      </div>
+    </mat-card>
+  </div>
 
   <p class="loading" *ngIf="loading()">Loading events…</p>
 
-  <button matButton="filled" (click)="applyFilters()">Apply filters</button>
+  <div>
+    <button matButton="filled" (click)="applyFilters()">Apply filters</button>
+  </div>
 </mat-card>

@@ -1,11 +1,10 @@
+@use 'functions' as *;
+
 .step-card {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1.5rem;
-  background: var(--mat-sys-surface-container);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  padding-bottom: to-rem(20);
 
   .step-header {
     display: flex;

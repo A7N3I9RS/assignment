@@ -1,10 +1,11 @@
 @use 'functions' as *;
+@use '@angular/material' as mat;
 
 .customer-filter {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 2rem;
+  padding: to-rem(20);
 
   .filter-header {
     display: flex;
@@ -30,12 +31,6 @@
     }
   }
 
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
   .add-step {
     align-self: flex-start;
     display: inline-flex;
@@ -46,5 +41,19 @@
   .loading {
     color: var(--mat-sys-on-surface-variant);
     margin: 0;
+  }
+}
+
+.steps {
+  padding: to-rem(20);
+  @include mat.card-overrides(
+    (
+      outlined-container-color: white,
+      outlined-outline-color: #efeef3,
+    )
+  );
+
+  .footer {
+    text-align: center;
   }
 }
