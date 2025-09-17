@@ -7,9 +7,6 @@
       <button mat-button type="button" (click)="discardFilters()" [disabled]="!canDiscard()">
         Discard filters
       </button>
-      <button mat-flat-button color="primary" type="button" (click)="applyFilters()">
-        Apply filters
-      </button>
     </div>
   </header>
 
@@ -33,12 +30,12 @@
     </ng-container>
   </section>
 
-  <button mat-stroked-button type="button" class="add-step" (click)="addStep()">
+  <button matButton class="add-step" (click)="addStep()">
     <mat-icon>add</mat-icon>
-    Add funnel step
+    ADD FUNNEL STEP
   </button>
 
   <p class="loading" *ngIf="loading()">Loading events…</p>
-</mat-card>
 
-<!-- <section class=""></section> -->
+  <button matButton="filled" (click)="applyFilters()">Apply filters</button>
+</mat-card>
