@@ -8,67 +8,72 @@
     <div class="step-actions">
       <button
         mat-icon-button
-        type="button"
         aria-label="Remove step"
         [disabled]="isOnlyStep"
         (click)="onRemoveStep()"
       >
         <mat-icon>delete</mat-icon>
       </button>
-      <button mat-icon-button type="button" aria-label="Duplicate step" (click)="onDuplicateStep()">
+      <button mat-icon-button aria-label="Duplicate step" (click)="onDuplicateStep()">
         <mat-icon>content_copy</mat-icon>
       </button>
     </div>
   </div>
 
-  <mat-form-field appearance="outline" class="event">
-    <mat-label>Select an event</mat-label>
-    <input
-      matInput
-      [formControl]="eventControl"
-      [matAutocomplete]="eventAutocomplete"
-      placeholder="Start typing to search"
-    />
-    <button
-      *ngIf="step.eventType"
-      mat-icon-button
-      matSuffix
-      type="button"
-      aria-label="Clear event"
-      (click)="clearEvent()"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
-  <mat-autocomplete
-    #eventAutocomplete="matAutocomplete"
-    (optionSelected)="onEventSelected($event.option.value)"
-  >
-    <mat-option *ngFor="let event of filterEvents(eventControl.value)" [value]="event.type">
-      {{ event.type }}
-    </mat-option>
-  </mat-autocomplete>
-
-  <ng-container *ngIf="step.eventType">
-    <div class="attribute-list" *ngIf="step.attributes.length">
-      <app-attribute-filter
-        *ngFor="let attribute of step.attributes; trackBy: trackAttribute"
-        [attribute]="attribute"
-        [eventLabel]="step.eventType"
-        [availableAttributes]="selectedEvent?.properties ?? []"
-        (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
-        (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
-        (valueChange)="onAttributeValueChange(attribute.id, $event)"
-        (remove)="onRemoveAttribute(attribute.id)"
-      ></app-attribute-filter>
+  <div class="field-wrapper">
+    <div class="event-column">
+      <mat-form-field appearance="outline" class="event">
+        <mat-label>Select an event</mat-label>
+        <input
+          matInput
+          [formControl]="eventControl"
+          [matAutocomplete]="eventAutocomplete"
+          placeholder="Start typing to search"
+        />
+        <button
+          *ngIf="step.eventType"
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear event"
+          (click)="clearEvent()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-autocomplete
+        #eventAutocomplete="matAutocomplete"
+        (optionSelected)="onEventSelected($event.option.value)"
+      >
+        <mat-option *ngFor="let event of filterEvents(eventControl.value)" [value]="event.type">
+          {{ event.type }}
+        </mat-option>
+      </mat-autocomplete>
     </div>
 
-    <button matButton class="add-attribute" (click)="onAddAttribute()">
-      <mat-icon *ngIf="!step.attributes.length">add</mat-icon>
-      <ng-container *ngIf="!step.attributes.length"> Add an event attribute </ng-container>
-      <ng-container *ngIf="step.attributes.length"> Refine more </ng-container>
-    </button>
-  </ng-container>
+    <div class="attribute-column">
+      <ng-container *ngIf="step.eventType">
+        <div class="attribute-wrapper" *ngIf="step.attributes.length">
+          <app-attribute-filter
+            *ngFor="let attribute of step.attributes; trackBy: trackAttribute"
+            [attribute]="attribute"
+            [eventLabel]="step.eventType"
+            [availableAttributes]="selectedEvent?.properties ?? []"
+            (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
+            (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
+            (valueChange)="onAttributeValueChange(attribute.id, $event)"
+            (remove)="onRemoveAttribute(attribute.id)"
+          ></app-attribute-filter>
+        </div>
+
+        <button matButton class="add-attribute" (click)="onAddAttribute()">
+          <mat-icon *ngIf="!step.attributes.length">add</mat-icon>
+          <ng-container *ngIf="!step.attributes.length"> Add an event attribute </ng-container>
+          <ng-container *ngIf="step.attributes.length"> Refine more </ng-container>
+        </button>
+      </ng-container>
+    </div>
+  </div>
 
   <mat-divider></mat-divider>
 </div>

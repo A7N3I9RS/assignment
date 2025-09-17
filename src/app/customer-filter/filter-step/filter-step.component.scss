@@ -1,7 +1,17 @@
 @use 'functions' as *;
 
+.step-actions {
+  visibility: hidden;
+}
+
 .step-item {
   padding-bottom: to-rem(20);
+
+  &:hover {
+    .step-actions {
+      visibility: visible;
+    }
+  }
 
   .step-header {
     display: flex;
@@ -25,4 +35,13 @@
 
 .event {
   margin-right: to-rem(15);
+}
+
+.field-wrapper {
+  display: flex;
+  align-items: start;
+}
+
+mat-divider {
+  margin-top: to-rem(10);
 }

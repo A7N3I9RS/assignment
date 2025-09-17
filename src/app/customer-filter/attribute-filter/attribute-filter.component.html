@@ -1,9 +1,5 @@
-<div class="attribute-filter">
-  <div class="attribute-header">
-    <mat-chip-set *ngIf="eventLabel" class="event-chip">
-      <mat-chip>{{ eventLabel }}</mat-chip>
-    </mat-chip-set>
-
+<div class="wrapper">
+  <div class="fields-wrapper">
     <mat-form-field appearance="outline" class="attribute-field">
       <mat-label>Select an attribute</mat-label>
       <input
@@ -36,6 +32,55 @@
       </mat-option>
     </mat-autocomplete>
 
+    <ng-container class="attribute-body" *ngIf="attribute?.property">
+      <mat-form-field appearance="outline" class="operator-field">
+        <mat-label>Select a condition</mat-label>
+        <mat-select
+          [value]="attribute.operator ?? null"
+          (selectionChange)="onOperatorSelected($event.value)"
+        >
+          <mat-option *ngFor="let option of getOperatorOptions()" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <ng-container class="value-field" *ngIf="shouldShowSingleValueInput()">
+        <mat-form-field appearance="outline">
+          <mat-label>Value</mat-label>
+          <input
+            matInput
+            [type]="getInputType() === 'number' ? 'number' : 'text'"
+            [value]="getSingleValue() ?? ''"
+            (input)="onSingleValueChange($any($event.target).value)"
+          />
+        </mat-form-field>
+      </ng-container>
+
+      <div class="range-fields" *ngIf="shouldShowRangeInput()">
+        <mat-form-field appearance="outline">
+          <mat-label>From</mat-label>
+          <input
+            matInput
+            type="number"
+            [value]="getRangeValue('from') ?? ''"
+            (input)="onRangeChange('from', $any($event.target).value)"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>To</mat-label>
+          <input
+            matInput
+            type="number"
+            [value]="getRangeValue('to') ?? ''"
+            (input)="onRangeChange('to', $any($event.target).value)"
+          />
+        </mat-form-field>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="actions-wrapper">
     <button
       mat-icon-button
       type="button"
@@ -43,51 +88,7 @@
       aria-label="Remove attribute"
       (click)="remove.emit()"
     >
-      <mat-icon>delete</mat-icon>
+      <mat-icon>close</mat-icon>
     </button>
-  </div>
-
-  <div class="attribute-body" *ngIf="attribute?.property">
-    <mat-form-field appearance="outline" class="operator-field">
-      <mat-label>Select a condition</mat-label>
-      <mat-select [value]="attribute.operator ?? null" (selectionChange)="onOperatorSelected($event.value)">
-        <mat-option *ngFor="let option of getOperatorOptions()" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <div class="value-field" *ngIf="shouldShowSingleValueInput()">
-      <mat-form-field appearance="outline">
-        <mat-label>Value</mat-label>
-        <input
-          matInput
-          [type]="getInputType() === 'number' ? 'number' : 'text'"
-          [value]="getSingleValue() ?? ''"
-          (input)="onSingleValueChange($any($event.target).value)"
-        />
-      </mat-form-field>
-    </div>
-
-    <div class="range-fields" *ngIf="shouldShowRangeInput()">
-      <mat-form-field appearance="outline">
-        <mat-label>From</mat-label>
-        <input
-          matInput
-          type="number"
-          [value]="getRangeValue('from') ?? ''"
-          (input)="onRangeChange('from', $any($event.target).value)"
-        />
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>To</mat-label>
-        <input
-          matInput
-          type="number"
-          [value]="getRangeValue('to') ?? ''"
-          (input)="onRangeChange('to', $any($event.target).value)"
-        />
-      </mat-form-field>
-    </div>
   </div>
 </div>

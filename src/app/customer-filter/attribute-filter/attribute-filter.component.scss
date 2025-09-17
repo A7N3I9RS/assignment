@@ -1,3 +1,22 @@
+@use 'functions' as *;
+
+mat-form-field {
+  margin-right: to-rem(15);
+}
+
+.wrapper {
+  display: flex;
+  &:hover {
+    .actions-wrapper {
+      display: block;
+    }
+  }
+}
+
+.actions-wrapper {
+  display: none;
+}
+
 .attribute-filter {
   display: flex;
   flex-direction: column;
