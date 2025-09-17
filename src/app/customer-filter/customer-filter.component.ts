@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatCardModule } from '@angular/material/card';
 
 import {
   AttributeFilter,
@@ -29,7 +30,7 @@ import { FilterStepComponent } from './filter-step/filter-step.component';
 @Component({
   selector: 'app-customer-filter',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, FilterStepComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, FilterStepComponent, MatCardModule],
   templateUrl: './customer-filter.component.html',
   styleUrl: './customer-filter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -124,12 +125,12 @@ export class CustomerFilterComponent {
         attributes: step.attributes.map((attribute) =>
           attribute.id === event.attributeId
             ? {
-                ...attribute,
-                property: event.property,
-                propertyType,
-                operator: undefined,
-                value: undefined
-              }
+              ...attribute,
+              property: event.property,
+              propertyType,
+              operator: undefined,
+              value: undefined
+            }
             : attribute
         )
       };

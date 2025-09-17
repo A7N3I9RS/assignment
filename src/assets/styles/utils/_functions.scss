@@ -1,0 +1,6 @@
+@use 'sass:math';
+@use '../base/variables';
+
+@function to-rem($px) {
+  @return math.div($px, variables.$base-font-size) * 1rem;
+}

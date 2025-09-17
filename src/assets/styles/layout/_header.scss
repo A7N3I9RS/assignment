@@ -1,0 +1,5 @@
+@use '../utils/functions' as *;
+
+.page-header {
+  height: to-rem(75);
+}
