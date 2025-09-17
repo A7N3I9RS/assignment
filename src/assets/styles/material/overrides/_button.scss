@@ -14,6 +14,16 @@
   );
 }
 
+:root {
+  // icon buttons
+  @include mat.icon-button-overrides(
+    (
+      icon-color: rgba(144, 146, 157, 0.9),
+      disabled-icon-color: rgba(144, 146, 157, 0.5),
+    )
+  );
+}
+
 .hazard {
   @include mat.button-overrides(
     (

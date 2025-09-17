@@ -1,9 +1,9 @@
 @use 'functions' as *;
 
 .step-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  // display: flex;
+  // flex-direction: column;
+  // gap: 1.5rem;
   padding-bottom: to-rem(20);
 
   .step-header {
@@ -16,17 +16,12 @@
       display: flex;
       align-items: baseline;
       gap: 0.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
 
     .step-index {
-      color: var(--mat-sys-on-surface);
-    }
-
-    .step-event {
-      color: var(--mat-sys-on-surface-variant);
-      font-size: 0.95rem;
+      color: #666a89;
+      font-weight: 500;
     }
   }
 

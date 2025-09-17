@@ -1,13 +1,11 @@
 <div class="step-card">
   <div class="step-header">
     <div class="step-title">
-      <span class="step-index">Step {{ stepIndex + 1 }}</span>
-      <span class="step-event" *ngIf="step.eventType">· {{ step.eventType }}</span>
+      <span class="step-index">{{ stepIndex + 1 }}. Step:</span>
+      <span class="step-event" *ngIf="step.eventType">{{ step.eventType }}</span>
+      <span class="step-event" *ngIf="!step.eventType">Unnamed step</span>
     </div>
     <div class="step-actions">
-      <button mat-icon-button type="button" aria-label="Duplicate step" (click)="onDuplicateStep()">
-        <mat-icon>content_copy</mat-icon>
-      </button>
       <button
         mat-icon-button
         type="button"
@@ -16,6 +14,9 @@
         (click)="onRemoveStep()"
       >
         <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-icon-button type="button" aria-label="Duplicate step" (click)="onDuplicateStep()">
+        <mat-icon>content_copy</mat-icon>
       </button>
     </div>
   </div>
