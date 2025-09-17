@@ -4,13 +4,13 @@
       <h1>CUSTOMER FILTER</h1>
     </div>
     <div class="header-actions">
-      <button mat-button type="button" (click)="discardFilters()" [disabled]="!canDiscard()">
+      <button mat-button class="hazard" (click)="discardFilters()" [disabled]="!canDiscard()">
         Discard filters
       </button>
     </div>
   </div>
 
-  <div>
+  <ng-container *ngIf="!loading() && !loadingError()">
     <mat-card class="steps" appearance="outlined">
       <div class="content">
         <ng-container *ngIf="steps() as stepList">
@@ -39,11 +39,12 @@
         </button>
       </div>
     </mat-card>
-  </div>
+
+    <div>
+      <button matButton="filled" (click)="applyFilters()">Apply filters</button>
+    </div>
+  </ng-container>
 
   <p class="loading" *ngIf="loading()">Loading events…</p>
-
-  <div>
-    <button matButton="filled" (click)="applyFilters()">Apply filters</button>
-  </div>
+  <p class="loading-error" *ngIf="loadingError()">Failed to load events.</p>
 </mat-card>

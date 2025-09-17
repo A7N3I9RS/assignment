@@ -40,6 +40,7 @@ export class CustomerFilterComponent {
 
   protected readonly events = signal<EventDefinition[]>([]);
   protected readonly loading = signal(false);
+  protected readonly loadingError = signal(false);
   protected readonly steps = signal<FilterStep[]>([]);
 
   protected readonly canDiscard = computed(() => {
@@ -211,6 +212,7 @@ export class CustomerFilterComponent {
 
   private fetchEvents(): void {
     this.loading.set(true);
+    this.loadingError.set(false);
     this.http
       .get<EventsResponse>('https://br-fe-assignment.github.io/customer-events/events.json')
       .pipe(
@@ -219,7 +221,10 @@ export class CustomerFilterComponent {
       )
       .subscribe({
         next: (response) => this.events.set(response.events),
-        error: (error) => console.error('Failed to load events', error)
+        error: (error) => {
+          this.loadingError.set(true);
+          console.error('Failed to load events', error);
+        }
       });
   }
 
