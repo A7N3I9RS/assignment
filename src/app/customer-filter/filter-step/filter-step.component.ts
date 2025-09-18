@@ -2,11 +2,14 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   EventEmitter,
   Input,
   OnChanges,
+  OnInit,
   Output,
-  SimpleChanges
+  SimpleChanges,
+  inject
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -17,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatOptionModule } from '@angular/material/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   AttributeOperator,
@@ -45,7 +49,7 @@ import { AttributeFilterComponent } from '../attribute-filter/attribute-filter.c
   styleUrl: './filter-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FilterStepComponent implements OnChanges {
+export class FilterStepComponent implements OnChanges, OnInit {
   @Input({ required: true }) step!: FilterStep;
   @Input({ required: true }) events: EventDefinition[] = [];
   @Input() stepIndex = 0;
@@ -72,11 +76,23 @@ export class FilterStepComponent implements OnChanges {
   @Output() duplicate = new EventEmitter<number>();
   @Output() remove = new EventEmitter<number>();
 
-  protected readonly eventControl = new FormControl('', { nonNullable: true });
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly eventControl = new FormControl<string | null>(null);
+
+  ngOnInit(): void {
+    this.eventControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        if ((value ?? '') === '' && this.step?.eventType) {
+          this.eventSelect.emit({ stepId: this.step.id, eventType: undefined });
+        }
+      });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['step']) {
-      const selected = this.step?.eventType ?? '';
+      const selected = this.step?.eventType ?? null;
       if (this.eventControl.value !== selected) {
         this.eventControl.setValue(selected, { emitEvent: false });
       }
@@ -101,8 +117,7 @@ export class FilterStepComponent implements OnChanges {
   }
 
   protected clearEvent(): void {
-    this.eventControl.setValue('', { emitEvent: false });
-    this.eventSelect.emit({ stepId: this.step.id, eventType: undefined });
+    this.eventControl.setValue(null);
   }
 
   protected onAddAttribute(): void {

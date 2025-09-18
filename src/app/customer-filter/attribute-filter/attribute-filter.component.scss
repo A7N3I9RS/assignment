@@ -1,5 +1,51 @@
 @use 'functions' as *;
 
+:host {
+  position: relative;
+}
+
+:host::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background-color: gray;
+  position: absolute;
+  top: 22px;
+}
+
+:host(:first-child)::before {
+  width: 21px;
+  left: -23px;
+}
+
+:host(:not(:first-child))::before {
+  width: 10px;
+  left: -12px;
+}
+
+:host(:not(:last-child))::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 63px;
+  background-color: gray;
+  position: absolute;
+  top: 23px;
+  left: -12px;
+}
+
+:host(:first-child) .connector-label {
+  display: none;
+}
+
+.connector-label {
+  position: absolute;
+  top: 13px;
+  left: -47px;
+  color: #8e8ea5;
+  font-size: 13px;
+}
+
 mat-form-field {
   margin-right: to-rem(15);
 }
