@@ -9,17 +9,16 @@
         [matAutocomplete]="attributeAutocomplete"
         placeholder="Start typing to search"
       />
-      @if (attribute.property) {
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear attribute"
-          (click)="clearAttribute()"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      }
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Clear attribute"
+        (click)="clearAttribute()"
+        [class.u-hidden]="!attribute.property"
+      >
+        <mat-icon>close_small</mat-icon>
+      </button>
     </mat-form-field>
 
     <mat-autocomplete
