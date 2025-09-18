@@ -10,26 +10,27 @@
     </div>
   </div>
 
-  <ng-container *ngIf="!loading() && !loadingError()">
+  @if (!loading() && !loadingError()) {
     <mat-card class="steps" appearance="outlined">
       <div class="content">
-        <ng-container *ngIf="steps() as stepList">
-          <app-filter-step
-            *ngFor="let step of stepList; index as index; trackBy: trackStep"
-            [step]="step"
-            [stepIndex]="index"
-            [events]="events()"
-            [isOnlyStep]="stepList.length === 1"
-            (eventSelect)="onEventSelect($event)"
-            (addAttribute)="addAttribute($event)"
-            (attributePropertyChange)="onAttributePropertyChange($event)"
-            (attributeOperatorChange)="onAttributeOperatorChange($event)"
-            (attributeValueChange)="onAttributeValueChange($event)"
-            (removeAttribute)="removeAttribute($event)"
-            (duplicate)="duplicateStep($event)"
-            (remove)="removeStep($event)"
-          ></app-filter-step>
-        </ng-container>
+        @if (steps(); as stepList) {
+          @for (step of stepList; track trackStep($index, step); let index = $index) {
+            <app-filter-step
+              [step]="step"
+              [stepIndex]="index"
+              [events]="events()"
+              [isOnlyStep]="stepList.length === 1"
+              (eventSelect)="onEventSelect($event)"
+              (addAttribute)="addAttribute($event)"
+              (attributePropertyChange)="onAttributePropertyChange($event)"
+              (attributeOperatorChange)="onAttributeOperatorChange($event)"
+              (attributeValueChange)="onAttributeValueChange($event)"
+              (removeAttribute)="removeAttribute($event)"
+              (duplicate)="duplicateStep($event)"
+              (remove)="removeStep($event)"
+            ></app-filter-step>
+          }
+        }
       </div>
 
       <div class="footer">
@@ -43,15 +44,17 @@
     <div>
       <button matButton="filled" (click)="applyFilters()">Apply filters</button>
     </div>
-  </ng-container>
-
-  <div class="common-loading-block" *ngIf="loading()">
-    <mat-spinner [diameter]="40" class="spinner"></mat-spinner>
-    <p>Loading events</p>
-  </div>
-
-  <div *ngIf="loadingError()">
-    <p class="common-error-text">Failed to load events.</p>
-    <button matButton="outlined" (click)="fetchEvents()">Retry</button>
-  </div>
+  }
+  @if (loading()) {
+    <div class="common-loading-block">
+      <mat-spinner [diameter]="40" class="spinner"></mat-spinner>
+      <p>Loading events</p>
+    </div>
+  }
+  @if (loadingError()) {
+    <div>
+      <p class="common-error-text">Failed to load events.</p>
+      <button matButton="outlined" (click)="fetchEvents()">Retry</button>
+    </div>
+  }
 </mat-card>

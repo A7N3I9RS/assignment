@@ -2,8 +2,11 @@
   <div class="step-header">
     <div class="step-title">
       <span class="step-index">{{ stepIndex + 1 }}. Step:</span>
-      <span class="step-event" *ngIf="step.eventType">{{ step.eventType }}</span>
-      <span class="step-event" *ngIf="!step.eventType">Unnamed step</span>
+      @if (step.eventType) {
+        <span class="step-event">{{ step.eventType }}</span>
+      } @else {
+        <span class="step-event">Unnamed step</span>
+      }
     </div>
     <div class="step-actions">
       <button
@@ -30,48 +33,58 @@
           [matAutocomplete]="eventAutocomplete"
           placeholder="Start typing to search"
         />
-        <button
-          *ngIf="step.eventType"
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear event"
-          (click)="clearEvent()"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
+        @if (step.eventType) {
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Clear event"
+            (click)="clearEvent()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </mat-form-field>
       <mat-autocomplete
         #eventAutocomplete="matAutocomplete"
         (optionSelected)="onEventSelected($event.option.value)"
       >
-        <mat-option *ngFor="let event of filterEvents(eventControl.value)" [value]="event.type">
-          {{ event.type }}
-        </mat-option>
+        @for (event of filterEvents(eventControl.value); track event.type) {
+          <mat-option [value]="event.type">
+            {{ event.type }}
+          </mat-option>
+        }
       </mat-autocomplete>
     </div>
 
     <div class="attribute-column">
-      <ng-container *ngIf="step.eventType">
-        <div class="attribute-wrapper" *ngIf="step.attributes.length">
-          <app-attribute-filter
-            *ngFor="let attribute of step.attributes; trackBy: trackAttribute"
-            [attribute]="attribute"
-            [eventLabel]="step.eventType"
-            [availableAttributes]="selectedEvent?.properties ?? []"
-            (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
-            (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
-            (valueChange)="onAttributeValueChange(attribute.id, $event)"
-            (remove)="onRemoveAttribute(attribute.id)"
-          ></app-attribute-filter>
+      @if (step.eventType && step.attributes.length) {
+        <div class="attribute-wrapper">
+          @for (attribute of step.attributes; track trackAttribute($index, attribute)) {
+            <app-attribute-filter
+              [attribute]="attribute"
+              [eventLabel]="step.eventType"
+              [availableAttributes]="selectedEvent?.properties ?? []"
+              (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
+              (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
+              (valueChange)="onAttributeValueChange(attribute.id, $event)"
+              (remove)="onRemoveAttribute(attribute.id)"
+            ></app-attribute-filter>
+          }
         </div>
-
+      }
+      @if (step.eventType) {
         <button matButton class="add-attribute" (click)="onAddAttribute()">
-          <mat-icon *ngIf="!step.attributes.length">add</mat-icon>
-          <ng-container *ngIf="!step.attributes.length"> Add an event attribute </ng-container>
-          <ng-container *ngIf="step.attributes.length"> Refine more </ng-container>
+          @if (!step.attributes.length) {
+            <mat-icon>add</mat-icon>
+          }
+          @if (!step.attributes.length) {
+            Add an event attribute
+          } @else {
+            Refine more
+          }
         </button>
-      </ng-container>
+      }
     </div>
   </div>
 
