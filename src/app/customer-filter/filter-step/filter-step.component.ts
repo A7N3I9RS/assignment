@@ -28,7 +28,6 @@ import { AttributeFilterComponent } from '../attribute-filter/attribute-filter.c
 
 @Component({
   selector: 'app-filter-step',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

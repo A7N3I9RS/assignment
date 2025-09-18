@@ -31,7 +31,6 @@ import {
 
 @Component({
   selector: 'app-attribute-filter',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

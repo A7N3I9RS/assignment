@@ -29,7 +29,6 @@ import { FilterStepComponent } from './filter-step/filter-step.component';
 
 @Component({
   selector: 'app-customer-filter',
-  standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, FilterStepComponent, MatCardModule],
   templateUrl: './customer-filter.component.html',
   styleUrl: './customer-filter.component.scss',
