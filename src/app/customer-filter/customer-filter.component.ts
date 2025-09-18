@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  OnInit,
   computed,
   inject,
   signal
 } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { finalize } from 'rxjs';
@@ -18,7 +19,6 @@ import {
   AttributeOperator,
   AttributeValue,
   EventDefinition,
-  EventsResponse,
   FilterStep,
   NUMBER_OPERATORS,
   OperatorOption,
@@ -26,16 +26,19 @@ import {
   STRING_OPERATORS
 } from './models';
 import { FilterStepComponent } from './filter-step/filter-step.component';
+import { CustomerFilterService } from './customer-filter.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-customer-filter',
-  imports: [CommonModule, MatButtonModule, MatIconModule, FilterStepComponent, MatCardModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, FilterStepComponent, MatCardModule, MatProgressSpinnerModule],
   templateUrl: './customer-filter.component.html',
   styleUrl: './customer-filter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CustomerFilterComponent {
-  private readonly http = inject(HttpClient);
+export class CustomerFilterComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly customerFilterService = inject(CustomerFilterService);
 
   protected readonly events = signal<EventDefinition[]>([]);
   protected readonly loading = signal(false);
@@ -55,7 +58,7 @@ export class CustomerFilterComponent {
   private stepIdCounter = 0;
   private attributeIdCounter = 0;
 
-  constructor() {
+  ngOnInit(): void {
     this.steps.set([this.createEmptyStep()]);
     this.fetchEvents();
   }
@@ -209,13 +212,13 @@ export class CustomerFilterComponent {
     return step.id;
   }
 
-  private fetchEvents(): void {
+  protected fetchEvents(): void {
     this.loading.set(true);
     this.loadingError.set(false);
-    this.http
-      .get<EventsResponse>('https://br-fe-assignment.github.io/customer-events/events.json')
+    this.customerFilterService
+      .getEvents()
       .pipe(
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
         finalize(() => this.loading.set(false))
       )
       .subscribe({

@@ -45,6 +45,13 @@
     </div>
   </ng-container>
 
-  <p class="loading" *ngIf="loading()">Loading events…</p>
-  <p class="loading-error" *ngIf="loadingError()">Failed to load events.</p>
+  <div class="common-loading-block" *ngIf="loading()">
+    <mat-spinner [diameter]="40" class="spinner"></mat-spinner>
+    <p>Loading events</p>
+  </div>
+
+  <div *ngIf="loadingError()">
+    <p class="common-error-text">Failed to load events.</p>
+    <button matButton="outlined" (click)="fetchEvents()">Retry</button>
+  </div>
 </mat-card>

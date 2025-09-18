@@ -34,7 +34,8 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "src/assets/styles/utils"
+                "src/assets/styles/utils",
+                "src/assets/styles/base"
               ]
             }
           },
@@ -97,7 +98,8 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "src/assets/styles/utils"
+                "src/assets/styles/utils",
+                "src/assets/styles/base"
               ]
             }
           }

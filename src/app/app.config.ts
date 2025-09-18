@@ -2,7 +2,6 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
-  isDevMode,
   provideAppInitializer,
   inject
 } from '@angular/core';
@@ -11,9 +10,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
-import { provideStore } from '@ngrx/store';
-import { provideEffects } from '@ngrx/effects';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { MatIconRegistry } from '@angular/material/icon';
 
 export const appConfig: ApplicationConfig = {
@@ -23,9 +19,6 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideHttpClient(),
     provideRouter(routes),
-    provideStore(),
-    provideEffects(),
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideAppInitializer(() => {
       const iconRegistry = inject(MatIconRegistry);
       iconRegistry.setDefaultFontSetClass('material-symbols-outlined');

@@ -1,0 +1,7 @@
+@use 'functions' as *;
+
+.common-error-text {
+  color: var(--mat-sys-error);
+  font-size: to-rem(14);
+  font-weight: 500;
+}

@@ -1,5 +1,5 @@
 @use '@angular/material' as mat;
-@use '../../base/colors';
+@use 'colors';
 
 :root {
   @include mat.button-overrides(
@@ -25,6 +25,7 @@
 }
 
 .hazard {
+  color: red;
   @include mat.button-overrides(
     (
       text-label-text-color: red,
