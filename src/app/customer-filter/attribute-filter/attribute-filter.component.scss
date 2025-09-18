@@ -8,7 +8,7 @@
   content: '';
   display: block;
   height: 1px;
-  background-color: gray;
+  background-color: var(--color-neutral-500);
   position: absolute;
   top: to-rem(22);
 }
@@ -28,7 +28,7 @@
   display: block;
   width: 1px;
   height: to-rem(63);
-  background-color: gray;
+  background-color: var(--color-neutral-500);
   position: absolute;
   top: to-rem(23);
   left: to-rem(-12);
@@ -42,7 +42,7 @@
   position: absolute;
   top: to-rem(13);
   left: to-rem(-47);
-  color: #8e8ea5;
+  color: var(--color-neutral-400);
   font-size: to-rem(13);
 }
 

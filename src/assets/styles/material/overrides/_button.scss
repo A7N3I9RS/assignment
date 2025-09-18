@@ -1,5 +1,4 @@
 @use '@angular/material' as mat;
-@use 'colors';
 @use 'functions' as *;
 
 :root {
@@ -7,7 +6,7 @@
     (
       // filled buttons
       filled-container-shape: 2px,
-      filled-container-color: colors.$accent,
+      filled-container-color: var(--color-accent),
       filled-label-text-color: --mat-sys-on-surface,
       // text buttons
       text-container-shape: 2px

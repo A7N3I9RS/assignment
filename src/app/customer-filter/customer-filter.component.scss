@@ -44,7 +44,7 @@
   @include mat.card-overrides(
     (
       outlined-container-color: white,
-      outlined-outline-color: #efeef3,
+      outlined-outline-color: var(--color-neutral-100),
     )
   );
 
