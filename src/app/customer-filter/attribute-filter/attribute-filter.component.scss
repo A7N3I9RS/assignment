@@ -18,55 +18,10 @@ mat-form-field {
   }
 }
 
-.attribute-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--mat-sys-surface-container-low);
-  border-radius: 12px;
+.range-fields {
+  display: inline;
 
-  .attribute-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    .event-chip {
-      --mdc-chip-container-height: 32px;
-    }
-
-    .attribute-field {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .remove-attribute {
-      margin-top: -0.25rem;
-    }
-  }
-
-  .attribute-body {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-
-    .operator-field {
-      flex: 1 1 220px;
-    }
-
-    .value-field {
-      flex: 2 1 260px;
-    }
-
-    .value-field mat-form-field,
-    .range-fields mat-form-field {
-      width: 100%;
-    }
-
-    .range-fields {
-      display: flex;
-      flex: 2 1 320px;
-      gap: 1rem;
-    }
+  mat-form-field {
+    width: 180px;
   }
 }

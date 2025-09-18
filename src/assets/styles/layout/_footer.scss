@@ -1,0 +1,5 @@
+@use '../utils/functions' as *;
+
+.page-footer {
+  height: to-rem(30);
+}
