@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -9,18 +10,20 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  ViewChild,
   inject
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatOptionModule } from '@angular/material/core';
+import { MatOption, MatOptionModule } from '@angular/material/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 
 import {
   AttributeOperator,
@@ -49,7 +52,7 @@ import { AttributeFilterComponent } from '../attribute-filter/attribute-filter.c
   styleUrl: './filter-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FilterStepComponent implements OnChanges, OnInit {
+export class FilterStepComponent implements OnChanges, OnInit, AfterViewInit {
   @Input({ required: true }) step!: FilterStep;
   @Input({ required: true }) events: EventDefinition[] = [];
   @Input() stepIndex = 0;
@@ -80,6 +83,8 @@ export class FilterStepComponent implements OnChanges, OnInit {
 
   protected readonly eventControl = new FormControl<string | null>(null);
 
+  @ViewChild(MatAutocomplete) private readonly eventAutocomplete?: MatAutocomplete;
+
   ngOnInit(): void {
     this.eventControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -96,7 +101,24 @@ export class FilterStepComponent implements OnChanges, OnInit {
       if (this.eventControl.value !== selected) {
         this.eventControl.setValue(selected, { emitEvent: false });
       }
+      this.syncAutocompleteSelection();
     }
+
+    if (changes['events']) {
+      this.syncAutocompleteSelection();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.eventAutocomplete) {
+      return;
+    }
+
+    this.eventAutocomplete.options.changes
+      .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncAutocompleteSelection());
+
+    this.syncAutocompleteSelection();
   }
 
   protected get selectedEvent(): EventDefinition | undefined {
@@ -150,5 +172,26 @@ export class FilterStepComponent implements OnChanges, OnInit {
 
   protected trackAttribute(_index: number, attribute: { id: number }): number {
     return attribute.id;
+  }
+
+  private syncAutocompleteSelection(): void {
+    const autocomplete = this.eventAutocomplete;
+    if (!autocomplete) {
+      return;
+    }
+
+    const selectedEventType = this.step?.eventType;
+
+    autocomplete.options.forEach((option: MatOption<string>) => {
+      const shouldSelect = !!selectedEventType && option.value === selectedEventType;
+
+      if (shouldSelect) {
+        if (!option.selected) {
+          option.select(false);
+        }
+      } else if (option.selected) {
+        option.deselect(false);
+      }
+    });
   }
 }

@@ -1,22 +1,28 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   EventEmitter,
   Input,
   OnChanges,
   Output,
-  SimpleChanges
+  SimpleChanges,
+  ViewChild,
+  inject
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatOptionModule } from '@angular/material/core';
+import { MatOption, MatOptionModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 
 import {
   AttributeFilter,
@@ -47,7 +53,7 @@ import {
   styleUrl: './attribute-filter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AttributeFilterComponent implements OnChanges {
+export class AttributeFilterComponent implements OnChanges, AfterViewInit {
   @Input({ required: true }) attribute!: AttributeFilter;
   @Input({ required: true }) availableAttributes: EventProperty[] = [];
   @Input() eventLabel?: string;
@@ -59,7 +65,11 @@ export class AttributeFilterComponent implements OnChanges {
   @Output() valueChange = new EventEmitter<AttributeValue>();
   @Output() remove = new EventEmitter<void>();
 
+  private readonly destroyRef = inject(DestroyRef);
+
   protected readonly attributeControl = new FormControl('', { nonNullable: true });
+
+  @ViewChild(MatAutocomplete) private readonly attributeAutocomplete?: MatAutocomplete;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['attribute']) {
@@ -74,7 +84,25 @@ export class AttributeFilterComponent implements OnChanges {
       ) {
         this.attributeControl.setValue('', { emitEvent: false });
       }
+
+      this.syncAutocompleteSelection();
     }
+
+    if (changes['availableAttributes']) {
+      this.syncAutocompleteSelection();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.attributeAutocomplete) {
+      return;
+    }
+
+    this.attributeAutocomplete.options.changes
+      .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncAutocompleteSelection());
+
+    this.syncAutocompleteSelection();
   }
 
   protected filterAttributes(query: string | null): EventProperty[] {
@@ -176,5 +204,26 @@ export class AttributeFilterComponent implements OnChanges {
     }
 
     return { from: null, to: null };
+  }
+
+  private syncAutocompleteSelection(): void {
+    const autocomplete = this.attributeAutocomplete;
+    if (!autocomplete) {
+      return;
+    }
+
+    const selectedProperty = this.attribute?.property;
+
+    autocomplete.options.forEach((option: MatOption<string>) => {
+      const shouldSelect = !!selectedProperty && option.value === selectedProperty;
+
+      if (shouldSelect) {
+        if (!option.selected) {
+          option.select(false);
+        }
+      } else if (option.selected) {
+        option.deselect(false);
+      }
+    });
   }
 }
