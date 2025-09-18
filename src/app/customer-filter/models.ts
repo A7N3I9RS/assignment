@@ -10,7 +10,9 @@ export interface EventDefinition {
 
 export type AttributeOperator =
   | 'equals'
+  | 'notEquals'
   | 'contains'
+  | 'notContains'
   | 'startsWith'
   | 'endsWith'
   | 'isEmpty'
@@ -55,7 +57,9 @@ export interface EventsResponse {
 
 export const STRING_OPERATORS: OperatorOption[] = [
   { value: 'equals', label: 'Equals', valueRequirement: 'single', inputType: 'text' },
+  { value: 'notEquals', label: 'Not equals', valueRequirement: 'single', inputType: 'text' },
   { value: 'contains', label: 'Contains', valueRequirement: 'single', inputType: 'text' },
+  { value: 'notContains', label: 'Does not contain', valueRequirement: 'single', inputType: 'text' },
   { value: 'startsWith', label: 'Starts with', valueRequirement: 'single', inputType: 'text' },
   { value: 'endsWith', label: 'Ends with', valueRequirement: 'single', inputType: 'text' },
   { value: 'isEmpty', label: 'Is empty', valueRequirement: 'none', inputType: 'text' },
