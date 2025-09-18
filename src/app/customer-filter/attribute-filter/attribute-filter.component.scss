@@ -10,28 +10,28 @@
   height: 1px;
   background-color: gray;
   position: absolute;
-  top: 22px;
+  top: to-rem(22);
 }
 
 :host(:first-child)::before {
-  width: 21px;
-  left: -23px;
+  width: to-rem(21);
+  left: to-rem(-23);
 }
 
 :host(:not(:first-child))::before {
-  width: 10px;
-  left: -12px;
+  width: to-rem(10);
+  left: to-rem(-12);
 }
 
 :host(:not(:last-child))::after {
   content: '';
   display: block;
   width: 1px;
-  height: 63px;
+  height: to-rem(63);
   background-color: gray;
   position: absolute;
-  top: 23px;
-  left: -12px;
+  top: to-rem(23);
+  left: to-rem(-12);
 }
 
 :host(:first-child) .connector-label {
@@ -40,10 +40,10 @@
 
 .connector-label {
   position: absolute;
-  top: 13px;
-  left: -47px;
+  top: to-rem(13);
+  left: to-rem(-47);
   color: #8e8ea5;
-  font-size: 13px;
+  font-size: to-rem(13);
 }
 
 mat-form-field {
@@ -68,6 +68,6 @@ mat-form-field {
   display: inline;
 
   mat-form-field {
-    width: 180px;
+    width: to-rem(180);
   }
 }

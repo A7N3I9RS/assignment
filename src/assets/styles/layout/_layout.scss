@@ -1,5 +1,7 @@
+@use 'functions' as *;
+
 .page-main-container {
-  max-width: 1280px;
+  max-width: to-rem(1280);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 to-rem(20);
 }

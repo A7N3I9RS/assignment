@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @use 'colors';
+@use 'functions' as *;
 
 :root {
   @include mat.button-overrides(

@@ -18,13 +18,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: to-rem(8);
 
     .step-title {
       display: flex;
       align-items: baseline;
-      gap: 0.5rem;
-      font-size: 1rem;
+      gap: to-rem(8);
+      font-size: to-rem(16);
     }
 
     .step-index {

@@ -1,9 +1,10 @@
 @use '@angular/material' as mat;
+@use 'functions' as *;
 
 :root {
   @include mat.card-overrides(
     (
-      outlined-container-shape: 5px,
+      outlined-container-shape: to-rem(5),
     )
   );
 }
