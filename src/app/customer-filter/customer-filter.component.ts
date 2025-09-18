@@ -223,9 +223,8 @@ export class CustomerFilterComponent implements OnInit {
       )
       .subscribe({
         next: (response) => this.events.set(response.events),
-        error: (error) => {
+        error: () => {
           this.loadingError.set(true);
-          console.error('Failed to load events', error);
         }
       });
   }

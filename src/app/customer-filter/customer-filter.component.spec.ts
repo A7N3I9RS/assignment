@@ -202,7 +202,6 @@ describe('CustomerFilterComponent', () => {
 
   it('should expose loading errors when the events request fails', () => {
     customerFilterService.getEvents.and.returnValue(throwError(() => new Error('Network error')));
-    const consoleErrorSpy = spyOn(console, 'error');
 
     fixture.detectChanges();
     const componentAny = component as any;
@@ -211,6 +210,5 @@ describe('CustomerFilterComponent', () => {
     expect(componentAny.events()).toEqual([]);
     expect(componentAny.loading()).toBeFalse();
     expect(componentAny.loadingError()).toBeTrue();
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load events', jasmine.any(Error));
   });
 });
