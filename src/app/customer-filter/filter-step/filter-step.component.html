@@ -24,7 +24,7 @@
   </div>
 
   <div class="field-wrapper">
-    <div class="event-column">
+    <div class="event-column" [class.attributes-present]="step.eventType && step.attributes.length">
       <mat-form-field appearance="outline" class="event">
         <mat-label>Select an event</mat-label>
         <input

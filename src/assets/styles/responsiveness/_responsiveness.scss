@@ -1,0 +1,24 @@
+@use '_variables' as *;
+
+@media (max-width: $breakpoint-md) {
+  mat-form-field,
+  .attribute-column,
+  .attribute-wrapper,
+  app-attribute-filter.wrapper,
+  .wrapper .fields-wrapper .range-fields mat-form-field.mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .fields-wrapper {
+    flex-grow: 1;
+  }
+
+  .connector-label {
+    transform: rotate(-90deg);
+    transform-origin: 80% 8%;
+  }
+
+  mat-card.mat-mdc-card.steps {
+    padding-left: 25px;
+  }
+}

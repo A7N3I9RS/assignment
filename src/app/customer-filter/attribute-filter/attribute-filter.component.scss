@@ -1,4 +1,5 @@
 @use 'functions' as *;
+@use '_variables' as *;
 
 :host {
   position: relative;
@@ -18,6 +19,13 @@
   left: to-rem(-23);
 }
 
+@media (max-width: $breakpoint-md) {
+  :host(:first-child)::before {
+    width: to-rem(10);
+    left: to-rem(-12);
+  }
+}
+
 :host(:not(:first-child))::before {
   width: to-rem(10);
   left: to-rem(-12);
@@ -27,7 +35,7 @@
   content: '';
   display: block;
   width: 1px;
-  height: to-rem(63);
+  height: 100%;
   background-color: var(--color-neutral-500);
   position: absolute;
   top: to-rem(23);
