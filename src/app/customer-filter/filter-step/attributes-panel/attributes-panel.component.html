@@ -1,0 +1,29 @@
+@let currentAttributes = attributes();
+@let currentEventType = eventType();
+@if (currentEventType && hasAttributes()) {
+  <div class="attribute-wrapper">
+    @for (attribute of currentAttributes; track attribute.id) {
+      <app-attribute-filter
+        [attribute]="attribute"
+        [eventLabel]="currentEventType"
+        [availableAttributes]="availableAttributes()"
+        (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
+        (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
+        (valueChange)="onAttributeValueChange(attribute.id, $event)"
+        (remove)="onRemoveAttribute(attribute.id)"
+      ></app-attribute-filter>
+    }
+  </div>
+}
+@if (currentEventType) {
+  <button matButton class="add-attribute" (click)="onAddAttribute()">
+    @if (!hasAttributes()) {
+      <mat-icon>add</mat-icon>
+    }
+    @if (!hasAttributes()) {
+      Add an event attribute
+    } @else {
+      Refine more
+    }
+  </button>
+}

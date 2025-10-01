@@ -1,0 +1,5 @@
+@use 'functions' as *;
+
+:host {
+  margin-right: to-rem(25);
+}

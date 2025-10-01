@@ -2,95 +2,33 @@
   @let currentStep = step();
   @let currentIndex = stepIndex();
   @let onlyStep = isOnlyStep();
-  <div class="step-header">
-    <div class="step-title">
-      <span class="step-index">{{ currentIndex + 1 }}. Step:</span>
-      @if (currentStep.eventType) {
-        <span class="step-event">{{ currentStep.eventType }}</span>
-      } @else {
-        <span class="step-event">Unnamed step</span>
-      }
-    </div>
-    <div class="step-actions">
-      <button
-        mat-icon-button
-        aria-label="Remove step"
-        [disabled]="onlyStep"
-        (click)="onRemoveStep()"
-      >
-        <mat-icon>delete</mat-icon>
-      </button>
-      <button mat-icon-button aria-label="Duplicate step" (click)="onDuplicateStep()">
-        <mat-icon>content_copy</mat-icon>
-      </button>
-    </div>
-  </div>
+  <app-filter-step-header
+    [step]="currentStep"
+    [stepIndex]="currentIndex"
+    [isOnlyStep]="onlyStep"
+    (duplicate)="duplicate.emit($event)"
+    (remove)="remove.emit($event)"
+  ></app-filter-step-header>
 
   <div class="field-wrapper">
-    <div
-      class="event-column"
-      [class.attributes-present]="currentStep.eventType && currentStep.attributes.length"
-    >
-      <mat-form-field appearance="outline" class="event">
-        <mat-label>Select an event</mat-label>
-        <input
-          matInput
-          [formControl]="eventControl"
-          [matAutocomplete]="eventAutocomplete"
-          placeholder="Start typing to search"
-        />
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear event"
-          (click)="clearEvent()"
-          [class.u-hidden]="!currentStep.eventType"
-        >
-          <mat-icon>close_small</mat-icon>
-        </button>
-      </mat-form-field>
-      <mat-autocomplete
-        #eventAutocomplete="matAutocomplete"
-        (optionSelected)="onEventSelected($event.option.value)"
-      >
-        @for (event of filteredEventOptions(); track event.type) {
-          <mat-option [value]="event.type">
-            {{ event.type }}
-          </mat-option>
-        }
-      </mat-autocomplete>
-    </div>
+    <app-filter-step-event-selector
+      [step]="currentStep"
+      [events]="events()"
+      (eventSelect)="onEventSelected($event)"
+      (clearEvent)="onEventCleared()"
+    ></app-filter-step-event-selector>
 
-    <div class="attribute-column">
-      @if (currentStep.eventType && currentStep.attributes.length) {
-        <div class="attribute-wrapper">
-          @for (attribute of currentStep.attributes; track attribute.id) {
-            <app-attribute-filter
-              [attribute]="attribute"
-              [eventLabel]="currentStep.eventType"
-              [availableAttributes]="selectedEvent()?.properties ?? []"
-              (propertyChange)="onAttributePropertyChange(attribute.id, $event)"
-              (operatorChange)="onAttributeOperatorChange(attribute.id, $event)"
-              (valueChange)="onAttributeValueChange(attribute.id, $event)"
-              (remove)="onRemoveAttribute(attribute.id)"
-            ></app-attribute-filter>
-          }
-        </div>
-      }
-      @if (currentStep.eventType) {
-        <button matButton class="add-attribute" (click)="onAddAttribute()">
-          @if (!currentStep.attributes.length) {
-            <mat-icon>add</mat-icon>
-          }
-          @if (!currentStep.attributes.length) {
-            Add an event attribute
-          } @else {
-            Refine more
-          }
-        </button>
-      }
-    </div>
+    <app-filter-step-attributes-panel
+      [stepId]="currentStep.id"
+      [eventType]="currentStep.eventType"
+      [attributes]="currentStep.attributes"
+      [availableAttributes]="selectedEvent()?.properties ?? []"
+      (addAttribute)="addAttribute.emit($event)"
+      (attributePropertyChange)="attributePropertyChange.emit($event)"
+      (attributeOperatorChange)="attributeOperatorChange.emit($event)"
+      (attributeValueChange)="attributeValueChange.emit($event)"
+      (removeAttribute)="removeAttribute.emit($event)"
+    ></app-filter-step-attributes-panel>
   </div>
 
   <mat-divider></mat-divider>
