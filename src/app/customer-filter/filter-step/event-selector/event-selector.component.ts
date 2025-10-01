@@ -64,19 +64,17 @@ export class EventSelectorComponent implements OnInit, AfterViewInit {
     () => !!this.step().eventType && this.step().attributes.length > 0
   );
 
-  constructor() {
-    effect(() => {
-      const currentStep = this.step();
-      const selected = currentStep.eventType ?? null;
+  private readonly syncEventEffect = effect(() => {
+    const currentStep = this.step();
+    const selected = currentStep.eventType ?? null;
 
-      if (this.eventControl.value !== selected) {
-        this.eventControl.setValue(selected, { emitEvent: false });
-      }
+    if (this.eventControl.value !== selected) {
+      this.eventControl.setValue(selected, { emitEvent: false });
+    }
 
-      this.updateFilteredEvents(this.eventControl.value);
-      this.syncAutocompleteSelection(currentStep.eventType);
-    });
-  }
+    this.updateFilteredEvents(this.eventControl.value);
+    this.syncAutocompleteSelection(currentStep.eventType);
+  });
 
   ngOnInit(): void {
     this.eventControl.valueChanges

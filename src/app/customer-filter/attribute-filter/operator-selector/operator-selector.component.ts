@@ -21,14 +21,12 @@ export class OperatorSelectorComponent {
 
   readonly selectedOperatorOption = signal<OperatorOption | undefined>(undefined);
 
-  constructor() {
-    effect(() => {
-      const attribute = this.attribute();
-      const options = this.operatorOptions();
-      const current = options.find((option) => option.value === attribute.operator);
-      this.selectedOperatorOption.set(current);
-    });
-  }
+  private readonly selectedOperatorEffect = effect(() => {
+    const attribute = this.attribute();
+    const options = this.operatorOptions();
+    const current = options.find((option) => option.value === attribute.operator);
+    this.selectedOperatorOption.set(current);
+  });
 
   onOperatorSelected(operator: AttributeOperator | null): void {
     const options = this.operatorOptions();

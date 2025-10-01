@@ -55,31 +55,24 @@ export class PropertySelectorComponent implements OnInit, AfterViewInit {
 
   readonly filteredAttributes = signal<EventProperty[]>([]);
 
-  constructor() {
-    effect(() => {
-      const attribute = this.attribute();
-      const currentProperty = attribute.property ?? '';
-      if (this.attributeControl.value !== currentProperty) {
-        this.attributeControl.setValue(currentProperty, { emitEvent: false });
-      }
+  private readonly syncAttributeEffect = effect(() => {
+    const attribute = this.attribute();
+    const currentProperty = attribute.property ?? '';
+    if (this.attributeControl.value !== currentProperty) {
+      this.attributeControl.setValue(currentProperty, { emitEvent: false });
+    }
+    if (currentProperty && !this.availableAttributes().some(a => a.property === currentProperty)) {
+      this.attributeControl.setValue('', { emitEvent: false });
+    }
+    this.updateFilteredAttributes(this.attributeControl.value);
+    this.syncAutocompleteSelection();
+  });
 
-      if (
-        currentProperty &&
-        !this.availableAttributes().some((attr) => attr.property === currentProperty)
-      ) {
-        this.attributeControl.setValue('', { emitEvent: false });
-      }
-
-      this.updateFilteredAttributes(this.attributeControl.value);
-      this.syncAutocompleteSelection();
-    });
-
-    effect(() => {
-      this.availableAttributes();
-      this.updateFilteredAttributes(this.attributeControl.value);
-      this.syncAutocompleteSelection();
-    });
-  }
+  private readonly syncAvailableEffect = effect(() => {
+    this.availableAttributes();
+    this.updateFilteredAttributes(this.attributeControl.value);
+    this.syncAutocompleteSelection();
+  });
 
   ngOnInit(): void {
     this.attributeControl.valueChanges
