@@ -195,21 +195,20 @@ export class CustomerFilterComponent implements OnInit {
         id: step.id,
         event: step.eventType ?? null,
         attributes: step.attributes
-          .filter((attribute) => attribute.property && attribute.operator)
+          .filter((attribute): attribute is AttributeFilter & {
+            property: string;
+            operator: AttributeOperator;
+          } => Boolean(attribute.property && attribute.operator))
           .map((attribute) => ({
-            property: attribute.property!,
+            property: attribute.property,
             type: attribute.propertyType ?? null,
-            operator: attribute.operator!,
+            operator: attribute.operator,
             value: this.normalizeValue(attribute)
           }))
       }))
     };
 
     console.log('Customer filter model', dataModel);
-  }
-
-  protected trackStep(_index: number, step: FilterStep): number {
-    return step.id;
   }
 
   protected fetchEvents(): void {

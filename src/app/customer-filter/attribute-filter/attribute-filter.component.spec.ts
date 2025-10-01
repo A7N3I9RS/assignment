@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SimpleChange } from '@angular/core';
 
 import { AttributeFilterComponent } from './attribute-filter.component';
 import { AttributeFilter } from '../models';
@@ -16,6 +15,14 @@ function createAttribute(overrides: Partial<AttributeFilter> = {}): AttributeFil
   };
 }
 
+function createInputEvent(value: string): Event {
+  const input = document.createElement('input');
+  input.value = value;
+  const event = new Event('input');
+  Object.defineProperty(event, 'target', { value: input, enumerable: true });
+  return event;
+}
+
 describe('AttributeFilterComponent', () => {
   let fixture: ComponentFixture<AttributeFilterComponent>;
   let component: AttributeFilterComponent;
@@ -27,27 +34,26 @@ describe('AttributeFilterComponent', () => {
 
     fixture = TestBed.createComponent(AttributeFilterComponent);
     component = fixture.componentInstance;
-    component.availableAttributes = AVAILABLE_ATTRIBUTES;
-    component.attribute = createAttribute();
-    component.ngOnChanges({ attribute: new SimpleChange(undefined, component.attribute, true) });
+    fixture.componentRef.setInput('availableAttributes', AVAILABLE_ATTRIBUTES);
+    fixture.componentRef.setInput('attribute', createAttribute());
     fixture.detectChanges();
   });
 
   it('should synchronize the property control with attribute changes and clear unavailable selections', () => {
-    const control = (component as any).attributeControl as { value: string };
+    const control = component.attributeControl;
 
     const emailAttribute = createAttribute({ property: 'email' });
-    component.attribute = emailAttribute;
-    component.ngOnChanges({ attribute: new SimpleChange(null, emailAttribute, true) });
+    fixture.componentRef.setInput('attribute', emailAttribute);
+    fixture.detectChanges();
     expect(control.value).toBe('email');
 
     const ageAttribute = createAttribute({ property: 'age', propertyType: 'number' });
-    component.attribute = ageAttribute;
-    component.ngOnChanges({ attribute: new SimpleChange(emailAttribute, ageAttribute, false) });
+    fixture.componentRef.setInput('attribute', ageAttribute);
+    fixture.detectChanges();
     expect(control.value).toBe('age');
 
-    component.availableAttributes = [AVAILABLE_ATTRIBUTES[0]];
-    component.ngOnChanges({ attribute: new SimpleChange(ageAttribute, ageAttribute, false) });
+    fixture.componentRef.setInput('availableAttributes', [AVAILABLE_ATTRIBUTES[0]]);
+    fixture.detectChanges();
     expect(control.value).toBe('');
   });
 
@@ -55,14 +61,13 @@ describe('AttributeFilterComponent', () => {
     const propertySpy = jasmine.createSpy('propertyChange');
     component.propertyChange.subscribe(propertySpy);
 
-    (component as any).onAttributeSelected('email');
+    component.onAttributeSelected('email');
     expect(propertySpy).toHaveBeenCalledWith('email');
 
-    (component as any).clearAttribute();
+    component.clearAttribute();
     expect(propertySpy).toHaveBeenCalledWith(undefined);
 
-    const control = (component as any).attributeControl as { value: string };
-    expect(control.value).toBe('');
+    expect(component.attributeControl.value).toBe('');
   });
 
   it('should sanitize emitted values for single value and range operators', () => {
@@ -73,25 +78,28 @@ describe('AttributeFilterComponent', () => {
           ? { ...(value as Record<string, unknown>) }
           : value
       );
-      component.attribute = { ...component.attribute, value };
+      const current = component.attribute();
+      fixture.componentRef.setInput('attribute', { ...current, value });
+      fixture.detectChanges();
     });
 
-    let previousAttribute = component.attribute;
-    component.attribute = createAttribute({ propertyType: 'number', operator: 'greaterThan' });
-    component.ngOnChanges({ attribute: new SimpleChange(previousAttribute, component.attribute, false) });
-    (component as any).onSingleValueChange('123');
-    (component as any).onSingleValueChange('abc');
-    (component as any).onSingleValueChange('');
+    fixture.componentRef.setInput('attribute', createAttribute({ propertyType: 'number', operator: 'greaterThan' }));
+    fixture.detectChanges();
+    component.onSingleValueChange(createInputEvent('123'));
+    component.onSingleValueChange(createInputEvent('abc'));
+    component.onSingleValueChange(createInputEvent(''));
 
-    previousAttribute = component.attribute;
-    component.attribute = createAttribute({
-      propertyType: 'number',
-      operator: 'between',
-      value: { from: 5, to: 7 }
-    });
-    component.ngOnChanges({ attribute: new SimpleChange(previousAttribute, component.attribute, false) });
-    (component as any).onRangeChange('from', '10');
-    (component as any).onRangeChange('to', '');
+    fixture.componentRef.setInput(
+      'attribute',
+      createAttribute({
+        propertyType: 'number',
+        operator: 'between',
+        value: { from: 5, to: 7 }
+      })
+    );
+    fixture.detectChanges();
+    component.onRangeChange('from', createInputEvent('10'));
+    component.onRangeChange('to', createInputEvent(''));
 
     expect(emitted).toEqual([
       123,

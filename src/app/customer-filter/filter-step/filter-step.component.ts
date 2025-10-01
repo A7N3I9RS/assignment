@@ -4,14 +4,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  EventEmitter,
-  Input,
-  OnChanges,
   OnInit,
-  Output,
-  SimpleChanges,
-  ViewChild,
-  inject
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -52,137 +51,143 @@ import { AttributeFilterComponent } from '../attribute-filter/attribute-filter.c
   styleUrl: './filter-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FilterStepComponent implements OnChanges, OnInit, AfterViewInit {
-  @Input({ required: true }) step!: FilterStep;
-  @Input({ required: true }) events: EventDefinition[] = [];
-  @Input() stepIndex = 0;
-  @Input() isOnlyStep = false;
+export class FilterStepComponent implements OnInit, AfterViewInit {
+  readonly step = input.required<FilterStep>();
+  readonly events = input.required<EventDefinition[]>();
+  readonly stepIndex = input(0);
+  readonly isOnlyStep = input(false);
 
-  @Output() eventSelect = new EventEmitter<{ stepId: number; eventType?: string }>();
-  @Output() addAttribute = new EventEmitter<number>();
-  @Output() attributePropertyChange = new EventEmitter<{
+  readonly eventSelect = output<{ stepId: number; eventType?: string }>();
+  readonly addAttribute = output<number>();
+  readonly attributePropertyChange = output<{
     stepId: number;
     attributeId: number;
     property?: string;
   }>();
-  @Output() attributeOperatorChange = new EventEmitter<{
+  readonly attributeOperatorChange = output<{
     stepId: number;
     attributeId: number;
     operator?: AttributeOperator;
   }>();
-  @Output() attributeValueChange = new EventEmitter<{
+  readonly attributeValueChange = output<{
     stepId: number;
     attributeId: number;
     value: AttributeValue;
   }>();
-  @Output() removeAttribute = new EventEmitter<{ stepId: number; attributeId: number }>();
-  @Output() duplicate = new EventEmitter<number>();
-  @Output() remove = new EventEmitter<number>();
+  readonly removeAttribute = output<{ stepId: number; attributeId: number }>();
+  readonly duplicate = output<number>();
+  readonly remove = output<number>();
 
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly eventControl = new FormControl<string | null>(null);
+  readonly eventControl = new FormControl<string | null>(null);
 
-  @ViewChild(MatAutocomplete) private readonly eventAutocomplete?: MatAutocomplete;
+  private readonly eventAutocomplete = viewChild<MatAutocomplete>(MatAutocomplete);
+
+  readonly filteredEventOptions = signal<EventDefinition[]>([]);
+
+  readonly selectedEvent = signal<EventDefinition | undefined>(undefined);
+
+  constructor() {
+    effect(() => {
+      const currentEvents = this.events();
+      const currentStep = this.step();
+      const selected = currentStep.eventType ?? null;
+
+      if (this.eventControl.value !== selected) {
+        this.eventControl.setValue(selected, { emitEvent: false });
+      }
+
+      const matchedEvent = currentEvents.find((event) => event.type === currentStep.eventType);
+      this.selectedEvent.set(matchedEvent);
+      this.updateFilteredEvents(this.eventControl.value);
+      this.syncAutocompleteSelection();
+    });
+  }
 
   ngOnInit(): void {
     this.eventControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
-        if ((value ?? '') === '' && this.step?.eventType) {
-          this.eventSelect.emit({ stepId: this.step.id, eventType: undefined });
+        this.updateFilteredEvents(value);
+
+        if ((value ?? '') === '' && this.step().eventType) {
+          this.eventSelect.emit({ stepId: this.step().id, eventType: undefined });
         }
       });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['step']) {
-      const selected = this.step?.eventType ?? null;
-      if (this.eventControl.value !== selected) {
-        this.eventControl.setValue(selected, { emitEvent: false });
-      }
-      this.syncAutocompleteSelection();
-    }
-
-    if (changes['events']) {
-      this.syncAutocompleteSelection();
-    }
-  }
-
   ngAfterViewInit(): void {
-    if (!this.eventAutocomplete) {
+    const autocomplete = this.eventAutocomplete();
+    if (!autocomplete) {
       return;
     }
 
-    this.eventAutocomplete.options.changes
+    autocomplete.options.changes
       .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncAutocompleteSelection());
 
     this.syncAutocompleteSelection();
   }
 
-  protected get selectedEvent(): EventDefinition | undefined {
-    return this.events.find((event) => event.type === this.step?.eventType);
+  onEventSelected(eventType: string): void {
+    this.eventSelect.emit({ stepId: this.step().id, eventType });
   }
 
-  protected filterEvents(query: string | null): EventDefinition[] {
-    const search = (query ?? '').toLowerCase();
-    return this.events.filter((event) => event.type.toLowerCase().includes(search));
-  }
-
-  protected displayEvent(type: string): string {
-    return type;
-  }
-
-  protected onEventSelected(eventType: string): void {
-    this.eventSelect.emit({ stepId: this.step.id, eventType });
-  }
-
-  protected clearEvent(): void {
+  clearEvent(): void {
     this.eventControl.setValue(null);
   }
 
-  protected onAddAttribute(): void {
-    this.addAttribute.emit(this.step.id);
+  onAddAttribute(): void {
+    this.addAttribute.emit(this.step().id);
   }
 
-  protected onAttributePropertyChange(attributeId: number, property?: string): void {
-    this.attributePropertyChange.emit({ stepId: this.step.id, attributeId, property });
+  onAttributePropertyChange(attributeId: number, property?: string): void {
+    this.attributePropertyChange.emit({ stepId: this.step().id, attributeId, property });
   }
 
-  protected onAttributeOperatorChange(attributeId: number, operator?: AttributeOperator): void {
-    this.attributeOperatorChange.emit({ stepId: this.step.id, attributeId, operator });
+  onAttributeOperatorChange(attributeId: number, operator?: AttributeOperator): void {
+    this.attributeOperatorChange.emit({ stepId: this.step().id, attributeId, operator });
   }
 
-  protected onAttributeValueChange(attributeId: number, value: AttributeValue): void {
-    this.attributeValueChange.emit({ stepId: this.step.id, attributeId, value });
+  onAttributeValueChange(attributeId: number, value: AttributeValue): void {
+    this.attributeValueChange.emit({ stepId: this.step().id, attributeId, value });
   }
 
-  protected onRemoveAttribute(attributeId: number): void {
-    this.removeAttribute.emit({ stepId: this.step.id, attributeId });
+  onRemoveAttribute(attributeId: number): void {
+    this.removeAttribute.emit({ stepId: this.step().id, attributeId });
   }
 
-  protected onDuplicateStep(): void {
-    this.duplicate.emit(this.step.id);
+  onDuplicateStep(): void {
+    this.duplicate.emit(this.step().id);
   }
 
-  protected onRemoveStep(): void {
-    this.remove.emit(this.step.id);
+  onRemoveStep(): void {
+    this.remove.emit(this.step().id);
   }
 
-  protected trackAttribute(_index: number, attribute: { id: number }): number {
-    return attribute.id;
+  private updateFilteredEvents(query: string | null): void {
+    const search = (query ?? '').toLowerCase();
+    const events = this.events();
+    this.filteredEventOptions.set(
+      events.filter((event) => event.type.toLowerCase().includes(search))
+    );
   }
 
   private syncAutocompleteSelection(): void {
-    const autocomplete = this.eventAutocomplete;
+    const autocomplete = this.eventAutocomplete();
     if (!autocomplete) {
       return;
     }
 
-    const selectedEventType = this.step?.eventType;
+    const selectedEventType = this.step().eventType;
 
-    autocomplete.options.forEach((option: MatOption<string>) => {
+    const options = autocomplete.options;
+    if (!options) {
+      return;
+    }
+
+    options.forEach((option: MatOption<string>) => {
       const shouldSelect = !!selectedEventType && option.value === selectedEventType;
 
       if (shouldSelect) {

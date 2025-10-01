@@ -14,7 +14,7 @@
     <mat-card class="steps" appearance="outlined">
       <div class="content">
         @if (steps(); as stepList) {
-          @for (step of stepList; track trackStep($index, step); let index = $index) {
+          @for (step of stepList; track step.id; let index = $index) {
             <app-filter-step
               [step]="step"
               [stepIndex]="index"

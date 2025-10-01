@@ -4,13 +4,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  ViewChild,
-  inject
+  OnInit,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -53,117 +54,131 @@ import {
   styleUrl: './attribute-filter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AttributeFilterComponent implements OnChanges, AfterViewInit {
-  @Input({ required: true }) attribute!: AttributeFilter;
-  @Input({ required: true }) availableAttributes: EventProperty[] = [];
-  @Input() eventLabel?: string;
-  @Input() stringOperators: OperatorOption[] = STRING_OPERATORS;
-  @Input() numberOperators: OperatorOption[] = NUMBER_OPERATORS;
+export class AttributeFilterComponent implements OnInit, AfterViewInit {
+  readonly attribute = input.required<AttributeFilter>();
+  readonly availableAttributes = input<EventProperty[]>([]);
+  readonly eventLabel = input<string | undefined>(undefined);
+  readonly stringOperators = input<OperatorOption[]>(STRING_OPERATORS);
+  readonly numberOperators = input<OperatorOption[]>(NUMBER_OPERATORS);
 
-  @Output() propertyChange = new EventEmitter<string | undefined>();
-  @Output() operatorChange = new EventEmitter<AttributeOperator | undefined>();
-  @Output() valueChange = new EventEmitter<AttributeValue>();
-  @Output() remove = new EventEmitter<void>();
+  readonly propertyChange = output<string | undefined>();
+  readonly operatorChange = output<AttributeOperator | undefined>();
+  readonly valueChange = output<AttributeValue>();
+  readonly remove = output<void>();
 
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly attributeControl = new FormControl('', { nonNullable: true });
+  readonly attributeControl = new FormControl('', { nonNullable: true });
 
-  @ViewChild(MatAutocomplete) private readonly attributeAutocomplete?: MatAutocomplete;
+  private readonly attributeAutocomplete = viewChild<MatAutocomplete>(MatAutocomplete);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['attribute']) {
-      const currentProperty = this.attribute?.property ?? '';
+  readonly filteredAttributes = signal<EventProperty[]>([]);
+
+  private readonly selectedOperatorOption = signal<OperatorOption | undefined>(undefined);
+
+  readonly operatorOptions = computed(() => {
+    const attribute = this.attribute();
+    return attribute.propertyType === 'number' ? this.numberOperators() : this.stringOperators();
+  });
+
+  readonly showSingleValueInput = computed(
+    () => this.selectedOperatorOption()?.valueRequirement === 'single'
+  );
+  readonly showRangeInput = computed(
+    () => this.selectedOperatorOption()?.valueRequirement === 'range'
+  );
+  readonly inputType = computed(() => this.selectedOperatorOption()?.inputType ?? 'text');
+
+  readonly singleValue = computed(() => {
+    const attribute = this.attribute();
+    const value = attribute.value;
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (typeof value === 'string' || typeof value === 'number') {
+      return value;
+    }
+
+    return undefined;
+  });
+
+  readonly rangeValue = computed<RangeValue>(() => {
+    const value = this.attribute().value;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const range = value as RangeValue;
+      return { from: range.from ?? null, to: range.to ?? null };
+    }
+
+    return { from: null, to: null };
+  });
+
+  constructor() {
+    effect(() => {
+      const attribute = this.attribute();
+      const currentProperty = attribute.property ?? '';
       if (this.attributeControl.value !== currentProperty) {
         this.attributeControl.setValue(currentProperty, { emitEvent: false });
       }
 
       if (
         currentProperty &&
-        !this.availableAttributes.some((attr) => attr.property === currentProperty)
+        !this.availableAttributes().some((attr) => attr.property === currentProperty)
       ) {
         this.attributeControl.setValue('', { emitEvent: false });
       }
 
+      const option = this.operatorOptions().find((item) => item.value === attribute.operator);
+      this.selectedOperatorOption.set(option);
+      this.updateFilteredAttributes(this.attributeControl.value);
       this.syncAutocompleteSelection();
-    }
+    });
 
-    if (changes['availableAttributes']) {
+    effect(() => {
+      this.availableAttributes();
+      this.updateFilteredAttributes(this.attributeControl.value);
       this.syncAutocompleteSelection();
-    }
+    });
+  }
+
+  ngOnInit(): void {
+    this.attributeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        this.updateFilteredAttributes(value);
+      });
   }
 
   ngAfterViewInit(): void {
-    if (!this.attributeAutocomplete) {
+    const autocomplete = this.attributeAutocomplete();
+    if (!autocomplete) {
       return;
     }
 
-    this.attributeAutocomplete.options.changes
+    autocomplete.options.changes
       .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncAutocompleteSelection());
 
     this.syncAutocompleteSelection();
   }
 
-  protected filterAttributes(query: string | null): EventProperty[] {
-    const search = (query ?? '').toLowerCase();
-    return this.availableAttributes.filter((attr) => attr.property.toLowerCase().includes(search));
-  }
-
-  protected getOperatorOptions(): OperatorOption[] {
-    if (this.attribute?.propertyType === 'number') {
-      return this.numberOperators;
-    }
-
-    return this.stringOperators;
-  }
-
-  protected onAttributeSelected(property: string): void {
+  onAttributeSelected(property: string): void {
     this.propertyChange.emit(property);
   }
 
-  protected clearAttribute(): void {
+  clearAttribute(): void {
     this.attributeControl.setValue('', { emitEvent: false });
     this.propertyChange.emit(undefined);
   }
 
-  protected onOperatorSelected(operator: AttributeOperator | null): void {
+  onOperatorSelected(operator: AttributeOperator | null): void {
     this.operatorChange.emit(operator ?? undefined);
   }
 
-  protected getOperatorOption(operator?: AttributeOperator): OperatorOption | undefined {
-    return this.getOperatorOptions().find((option) => option.value === operator);
-  }
-
-  protected shouldShowSingleValueInput(): boolean {
-    const option = this.getOperatorOption(this.attribute?.operator);
-    return option?.valueRequirement === 'single';
-  }
-
-  protected shouldShowRangeInput(): boolean {
-    const option = this.getOperatorOption(this.attribute?.operator);
-    return option?.valueRequirement === 'range';
-  }
-
-  protected getInputType(): 'text' | 'number' {
-    const option = this.getOperatorOption(this.attribute?.operator);
-    return option?.inputType ?? 'text';
-  }
-
-  protected getSingleValue(): string | number | undefined {
-    if (this.attribute?.value === undefined) {
-      return undefined;
-    }
-
-    if (typeof this.attribute.value === 'string' || typeof this.attribute.value === 'number') {
-      return this.attribute.value;
-    }
-
-    return undefined;
-  }
-
-  protected onSingleValueChange(rawValue: string): void {
-    const option = this.getOperatorOption(this.attribute?.operator);
+  onSingleValueChange(event: Event): void {
+    const target = event.target instanceof HTMLInputElement ? event.target : null;
+    const rawValue = target?.value ?? '';
+    const option = this.selectedOperatorOption();
     if (!option) {
       this.valueChange.emit(undefined);
       return;
@@ -183,38 +198,37 @@ export class AttributeFilterComponent implements OnChanges, AfterViewInit {
     this.valueChange.emit(rawValue === '' ? undefined : rawValue);
   }
 
-  protected getRangeValue(part: 'from' | 'to'): number | null {
-    const range = this.asRangeValue();
-    return (range[part] ?? null) as number | null;
-  }
-
-  protected onRangeChange(part: 'from' | 'to', rawValue: string): void {
+  onRangeChange(part: 'from' | 'to', event: Event): void {
+    const target = event.target instanceof HTMLInputElement ? event.target : null;
+    const rawValue = target?.value ?? '';
     const numericValue = rawValue === '' ? null : Number(rawValue);
     const sanitized = numericValue !== null && !Number.isFinite(numericValue) ? null : numericValue;
-    const current = this.asRangeValue();
+    const current = this.rangeValue();
     const next: RangeValue = { ...current, [part]: sanitized };
     this.valueChange.emit(next);
   }
 
-  private asRangeValue(): RangeValue {
-    const value = this.attribute?.value;
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      const range = value as RangeValue;
-      return { from: range.from ?? null, to: range.to ?? null };
-    }
-
-    return { from: null, to: null };
+  private updateFilteredAttributes(query: string | null): void {
+    const search = (query ?? '').toLowerCase();
+    this.filteredAttributes.set(
+      this.availableAttributes().filter((attr) => attr.property.toLowerCase().includes(search))
+    );
   }
 
   private syncAutocompleteSelection(): void {
-    const autocomplete = this.attributeAutocomplete;
+    const autocomplete = this.attributeAutocomplete();
     if (!autocomplete) {
       return;
     }
 
-    const selectedProperty = this.attribute?.property;
+    const selectedProperty = this.attribute().property;
 
-    autocomplete.options.forEach((option: MatOption<string>) => {
+    const options = autocomplete.options;
+    if (!options) {
+      return;
+    }
+
+    options.forEach((option: MatOption<string>) => {
       const shouldSelect = !!selectedProperty && option.value === selectedProperty;
 
       if (shouldSelect) {
