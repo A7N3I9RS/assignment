@@ -1,13 +1,13 @@
 import {
-  DestroyRef,
   Injectable,
   computed,
+  effect,
   inject,
   signal
 } from '@angular/core';
 import { finalize } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { CustomerFilterService } from './customer-filter.service';
 import {
   AttributeFilter,
   AttributeOperator,
@@ -19,11 +19,9 @@ import {
   RangeValue,
   STRING_OPERATORS
 } from './models';
-import { CustomerFilterService } from './customer-filter.service';
 
 @Injectable()
 export class FilterStateService {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly customerFilterService = inject(CustomerFilterService);
 
   readonly events = signal<EventDefinition[]>([]);
@@ -45,11 +43,44 @@ export class FilterStateService {
   private stepIdCounter = 0;
   private attributeIdCounter = 0;
 
+  private readonly reloadTick = signal(0);
+
+  private initialized = false;
+
+  private readonly fetchEventsEffect = effect(
+    (onCleanup) => {
+      this.reloadTick();
+
+      if (!this.initialized) return;
+
+      this.loading.set(true);
+      this.loadingError.set(false);
+
+      const sub = this.customerFilterService
+        .getEvents()
+        .pipe(finalize(() => this.loading.set(false)))
+        .subscribe({
+          next: (response) => this.events.set(response.events),
+          error: () => this.loadingError.set(true),
+        });
+
+      onCleanup(() => sub.unsubscribe());
+    }
+  );
+
   initialize(): void {
+    if (this.initialized) return;
+    this.initialized = true;
+
     this.stepIdCounter = 0;
     this.attributeIdCounter = 0;
     this.steps.set([this.createEmptyStep()]);
+
     this.fetchEvents();
+  }
+
+  fetchEvents(): void {
+    this.reloadTick.update(n => n + 1);
   }
 
   addStep(): void {
@@ -117,12 +148,12 @@ export class FilterStateService {
         attributes: step.attributes.map((attribute) =>
           attribute.id === event.attributeId
             ? {
-                ...attribute,
-                property: event.property,
-                propertyType,
-                operator: undefined,
-                value: undefined
-              }
+              ...attribute,
+              property: event.property,
+              propertyType,
+              operator: undefined,
+              value: undefined
+            }
             : attribute
         )
       };
@@ -184,10 +215,12 @@ export class FilterStateService {
         id: step.id,
         event: step.eventType ?? null,
         attributes: step.attributes
-          .filter((attribute): attribute is AttributeFilter & {
-            property: string;
-            operator: AttributeOperator;
-          } => Boolean(attribute.property && attribute.operator))
+          .filter(
+            (attribute): attribute is AttributeFilter & {
+              property: string;
+              operator: AttributeOperator;
+            } => Boolean(attribute.property && attribute.operator)
+          )
           .map((attribute) => ({
             property: attribute.property,
             type: attribute.propertyType ?? null,
@@ -198,23 +231,6 @@ export class FilterStateService {
     };
 
     console.log('Customer filter model', dataModel);
-  }
-
-  fetchEvents(): void {
-    this.loading.set(true);
-    this.loadingError.set(false);
-    this.customerFilterService
-      .getEvents()
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.loading.set(false))
-      )
-      .subscribe({
-        next: (response) => this.events.set(response.events),
-        error: () => {
-          this.loadingError.set(true);
-        }
-      });
   }
 
   private updateStep(stepId: number, updater: (step: FilterStep) => FilterStep): void {
