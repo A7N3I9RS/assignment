@@ -18,7 +18,8 @@ import { AttributeOperator, AttributeValue } from './models';
   providers: [FilterStateService]
 })
 export class CustomerFilterComponent implements OnInit {
-  private readonly filterState = inject(FilterStateService);
+  private readonly filterState =
+    inject(FilterStateService, { optional: true, skipSelf: true }) ?? inject(FilterStateService);
 
   protected readonly events = this.filterState.events;
   protected readonly loading = this.filterState.loading;
