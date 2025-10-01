@@ -1,11 +1,5 @@
-import {
-  Injectable,
-  computed,
-  effect,
-  inject,
-  signal
-} from '@angular/core';
-import { finalize } from 'rxjs';
+import { Injectable, OnDestroy, computed, inject, signal } from '@angular/core';
+import { Subscription, finalize } from 'rxjs';
 
 import { CustomerFilterService } from './customer-filter.service';
 import {
@@ -21,7 +15,7 @@ import {
 } from './models';
 
 @Injectable()
-export class FilterStateService {
+export class FilterStateService implements OnDestroy {
   private readonly customerFilterService = inject(CustomerFilterService);
 
   readonly events = signal<EventDefinition[]>([]);
@@ -43,30 +37,12 @@ export class FilterStateService {
   private stepIdCounter = 0;
   private attributeIdCounter = 0;
 
-  private readonly reloadTick = signal(0);
-
   private initialized = false;
+  private eventsSubscription?: Subscription;
 
-  private readonly fetchEventsEffect = effect(
-    (onCleanup) => {
-      this.reloadTick();
-
-      if (!this.initialized) return;
-
-      this.loading.set(true);
-      this.loadingError.set(false);
-
-      const sub = this.customerFilterService
-        .getEvents()
-        .pipe(finalize(() => this.loading.set(false)))
-        .subscribe({
-          next: (response) => this.events.set(response.events),
-          error: () => this.loadingError.set(true),
-        });
-
-      onCleanup(() => sub.unsubscribe());
-    }
-  );
+  ngOnDestroy(): void {
+    this.eventsSubscription?.unsubscribe();
+  }
 
   initialize(): void {
     if (this.initialized) return;
@@ -80,7 +56,25 @@ export class FilterStateService {
   }
 
   fetchEvents(): void {
-    this.reloadTick.update(n => n + 1);
+    if (!this.initialized) {
+      return;
+    }
+
+    this.eventsSubscription?.unsubscribe();
+
+    this.loading.set(true);
+    this.loadingError.set(false);
+
+    this.eventsSubscription = this.customerFilterService
+      .getEvents()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => this.events.set(response.events),
+        error: () => {
+          this.loadingError.set(true);
+          this.events.set([]);
+        },
+      });
   }
 
   addStep(): void {
