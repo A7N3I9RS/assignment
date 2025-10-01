@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
 import { AttributeFilterComponent } from './attribute-filter.component';
 import { AttributeFilter } from '../models';
+import { PropertySelectorComponent } from './property-selector/property-selector.component';
+import { ValueInputComponent } from './value-input/value-input.component';
 
 const AVAILABLE_ATTRIBUTES = [
   { property: 'email', type: 'string' as const },
@@ -40,7 +43,9 @@ describe('AttributeFilterComponent', () => {
   });
 
   it('should synchronize the property control with attribute changes and clear unavailable selections', () => {
-    const control = component.attributeControl;
+    const propertySelector = fixture.debugElement.query(By.directive(PropertySelectorComponent))
+      ?.componentInstance as PropertySelectorComponent;
+    const control = propertySelector.attributeControl;
 
     const emailAttribute = createAttribute({ property: 'email' });
     fixture.componentRef.setInput('attribute', emailAttribute);
@@ -61,13 +66,16 @@ describe('AttributeFilterComponent', () => {
     const propertySpy = jasmine.createSpy('propertyChange');
     component.propertyChange.subscribe(propertySpy);
 
-    component.onAttributeSelected('email');
+    const propertySelector = fixture.debugElement.query(By.directive(PropertySelectorComponent))
+      ?.componentInstance as PropertySelectorComponent;
+
+    propertySelector.onAttributeSelected('email');
     expect(propertySpy).toHaveBeenCalledWith('email');
 
-    component.clearAttribute();
+    propertySelector.clearAttribute();
     expect(propertySpy).toHaveBeenCalledWith(undefined);
 
-    expect(component.attributeControl.value).toBe('');
+    expect(propertySelector.attributeControl.value).toBe('');
   });
 
   it('should sanitize emitted values for single value and range operators', () => {
@@ -83,23 +91,31 @@ describe('AttributeFilterComponent', () => {
       fixture.detectChanges();
     });
 
-    fixture.componentRef.setInput('attribute', createAttribute({ propertyType: 'number', operator: 'greaterThan' }));
+    fixture.componentRef.setInput(
+      'attribute',
+      createAttribute({ property: 'age', propertyType: 'number', operator: 'greaterThan' })
+    );
     fixture.detectChanges();
-    component.onSingleValueChange(createInputEvent('123'));
-    component.onSingleValueChange(createInputEvent('abc'));
-    component.onSingleValueChange(createInputEvent(''));
+    let valueInput = fixture.debugElement.query(By.directive(ValueInputComponent))
+      ?.componentInstance as ValueInputComponent;
+    valueInput.onSingleValueChange(createInputEvent('123'));
+    valueInput.onSingleValueChange(createInputEvent('abc'));
+    valueInput.onSingleValueChange(createInputEvent(''));
 
     fixture.componentRef.setInput(
       'attribute',
       createAttribute({
+        property: 'age',
         propertyType: 'number',
         operator: 'between',
         value: { from: 5, to: 7 }
       })
     );
     fixture.detectChanges();
-    component.onRangeChange('from', createInputEvent('10'));
-    component.onRangeChange('to', createInputEvent(''));
+    valueInput = fixture.debugElement.query(By.directive(ValueInputComponent))
+      ?.componentInstance as ValueInputComponent;
+    valueInput.onRangeChange('from', createInputEvent('10'));
+    valueInput.onRangeChange('to', createInputEvent(''));
 
     expect(emitted).toEqual([
       123,

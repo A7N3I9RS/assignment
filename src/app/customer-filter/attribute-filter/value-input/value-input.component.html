@@ -1,0 +1,35 @@
+@let attributeData = attribute();
+@let requirement = valueRequirement();
+@if (attributeData.property && requirement === 'single') {
+  <mat-form-field appearance="outline" class="value-field">
+    <mat-label>Value</mat-label>
+    <input
+      matInput
+      [type]="inputType() === 'number' ? 'number' : 'text'"
+      [value]="singleValue() ?? ''"
+      (input)="onSingleValueChange($event)"
+    />
+  </mat-form-field>
+}
+@if (attributeData.property && requirement === 'range') {
+  <div class="range-fields">
+    <mat-form-field appearance="outline">
+      <mat-label>From</mat-label>
+      <input
+        matInput
+        type="number"
+        [value]="rangeValue().from ?? ''"
+        (input)="onRangeChange('from', $event)"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>To</mat-label>
+      <input
+        matInput
+        type="number"
+        [value]="rangeValue().to ?? ''"
+        (input)="onRangeChange('to', $event)"
+      />
+    </mat-form-field>
+  </div>
+}

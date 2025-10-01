@@ -2,88 +2,26 @@
 <div class="wrapper">
   @let attributeData = attribute();
   <div class="fields-wrapper">
-    <mat-form-field appearance="outline" class="attribute-field">
-      <mat-label>Select an attribute</mat-label>
-      <input
-        matInput
-        [formControl]="attributeControl"
-        [matAutocomplete]="attributeAutocomplete"
-        placeholder="Start typing to search"
-      />
-      <button
-        mat-icon-button
-        matSuffix
-        type="button"
-        aria-label="Clear attribute"
-        (click)="clearAttribute()"
-        [class.u-hidden]="!attributeData.property"
-      >
-        <mat-icon>close_small</mat-icon>
-      </button>
-    </mat-form-field>
-
-    <mat-autocomplete
-      #attributeAutocomplete="matAutocomplete"
-      (optionSelected)="onAttributeSelected($event.option.value)"
-    >
-      @for (option of filteredAttributes(); track option.property) {
-        <mat-option [value]="option.property">
-          {{ option.property }}
-        </mat-option>
-      }
-    </mat-autocomplete>
+    <app-property-selector
+      [attribute]="attributeData"
+      [availableAttributes]="availableAttributes()"
+      (propertyChange)="propertyChange.emit($event)"
+    ></app-property-selector>
 
     @if (attributeData.property) {
       <ng-container class="attribute-body">
-        <mat-form-field appearance="outline" class="operator-field">
-          <mat-label>Select a condition</mat-label>
-          <mat-select
-            [value]="attributeData.operator ?? null"
-            (selectionChange)="onOperatorSelected($event.value)"
-          >
-            @for (option of operatorOptions(); track option.value) {
-              <mat-option [value]="option.value">
-                {{ option.label }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <app-operator-selector
+          [attribute]="attributeData"
+          [operatorOptions]="operatorOptions()"
+          (operatorChange)="operatorChange.emit($event)"
+        ></app-operator-selector>
 
-        @if (showSingleValueInput()) {
-          <ng-container class="value-field">
-            <mat-form-field appearance="outline">
-              <mat-label>Value</mat-label>
-              <input
-                matInput
-                [type]="inputType() === 'number' ? 'number' : 'text'"
-                [value]="singleValue() ?? ''"
-                (input)="onSingleValueChange($event)"
-              />
-            </mat-form-field>
-          </ng-container>
-        }
-        @if (showRangeInput()) {
-          <div class="range-fields">
-            <mat-form-field appearance="outline">
-              <mat-label>From</mat-label>
-              <input
-                matInput
-                type="number"
-                [value]="rangeValue().from ?? ''"
-                (input)="onRangeChange('from', $event)"
-              />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>To</mat-label>
-              <input
-                matInput
-                type="number"
-                [value]="rangeValue().to ?? ''"
-                (input)="onRangeChange('to', $event)"
-              />
-            </mat-form-field>
-          </div>
-        }
+        <app-value-input
+          [attribute]="attributeData"
+          [valueRequirement]="valueRequirement()"
+          [inputType]="inputType()"
+          (valueChange)="valueChange.emit($event)"
+        ></app-value-input>
       </ng-container>
     }
   </div>

@@ -1,0 +1,11 @@
+@let attributeData = attribute();
+<mat-form-field appearance="outline" class="operator-field">
+  <mat-label>Select a condition</mat-label>
+  <mat-select [value]="attributeData.operator ?? null" (selectionChange)="onOperatorSelected($event.value)">
+    @for (option of operatorOptions(); track option.value) {
+      <mat-option [value]="option.value">
+        {{ option.label }}
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>

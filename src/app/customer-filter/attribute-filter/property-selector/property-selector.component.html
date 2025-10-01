@@ -1,0 +1,31 @@
+@let attributeData = attribute();
+<mat-form-field appearance="outline" class="attribute-field">
+  <mat-label>Select an attribute</mat-label>
+  <input
+    matInput
+    [formControl]="attributeControl"
+    [matAutocomplete]="attributeAutocomplete"
+    placeholder="Start typing to search"
+  />
+  <button
+    mat-icon-button
+    matSuffix
+    type="button"
+    aria-label="Clear attribute"
+    (click)="clearAttribute()"
+    [class.u-hidden]="!attributeData.property"
+  >
+    <mat-icon>close_small</mat-icon>
+  </button>
+</mat-form-field>
+
+<mat-autocomplete
+  #attributeAutocomplete="matAutocomplete"
+  (optionSelected)="onAttributeSelected($event.option.value)"
+>
+  @for (option of filteredAttributes(); track option.property) {
+    <mat-option [value]="option.property">
+      {{ option.property }}
+    </mat-option>
+  }
+</mat-autocomplete>

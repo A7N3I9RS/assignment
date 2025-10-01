@@ -54,10 +54,6 @@
   font-size: to-rem(13);
 }
 
-mat-form-field {
-  margin-right: to-rem(15);
-}
-
 .actions-wrapper {
   opacity: 0;
 }
@@ -69,13 +65,5 @@ mat-form-field {
     .actions-wrapper {
       opacity: 1;
     }
-  }
-}
-
-.range-fields {
-  display: inline;
-
-  mat-form-field {
-    width: to-rem(180);
   }
 }

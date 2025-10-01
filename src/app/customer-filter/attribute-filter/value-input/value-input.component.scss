@@ -1,0 +1,17 @@
+@use 'functions' as *;
+
+:host {
+  display: inline-block;
+}
+
+mat-form-field {
+  margin-right: to-rem(15);
+}
+
+.range-fields {
+  display: inline;
+
+  mat-form-field {
+    width: to-rem(180);
+  }
+}
